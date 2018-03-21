@@ -1,0 +1,95 @@
+#include "stdafx.h"
+#include "WinAPI.h"
+#include <tchar.h>
+#include <Windows.h>
+
+LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
+
+	switch (iMsg)
+	{
+		
+	case WM_LBUTTONDOWN:
+	{
+		HDC hDC = nullptr;
+		HBRUSH hOldBrush = nullptr;
+		HBRUSH hMyBrush = nullptr;
+		HPEN hOldPen = nullptr;
+		HPEN hMyPen = nullptr;
+		
+		hDC = GetDC(hWnd);
+
+		hMyBrush = CreateSolidBrush(RGB(255, 0, 0));
+		hMyPen = CreatePen(PS_DASH, 5, RGB(0, 255, 0));
+
+		hOldBrush = reinterpret_cast<HBRUSH>(SelectObject(hDC, hMyBrush));
+		hOldPen = reinterpret_cast<HPEN>(SelectObject(hDC, hMyPen));
+
+		Rectangle(hDC, 10, 10, 110, 110);
+
+		SelectObject(hDC, hOldBrush);
+		SelectObject(hDC, hOldPen);
+
+		Ellipse(hDC, 60, 10, 160, 110);
+
+		TextOut(hDC, 10, 10, TEXT("TEXT"), 4);
+
+		MoveToEx(hDC, 10, 10, nullptr);
+		LineTo(hDC, 110, 100);
+		LineTo(hDC, 50, 150);
+
+		DeleteObject(hMyBrush);
+		DeleteObject(hMyPen);
+
+		ReleaseDC(hWnd, hDC);
+
+		break;
+
+	}
+		
+
+	case WM_DESTROY:
+		
+		PostQuitMessage(0);
+		break;
+	}
+
+
+	return DefWindowProc(hWnd, iMsg, wParam, lParam);
+}
+
+
+
+INT APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE, TCHAR *pszLine, INT nShow)
+{
+	HWND hWnd;
+	WNDCLASS wc;
+	MSG msg;
+
+	wc.style = CS_OWNDC;
+	wc.lpfnWndProc = WndProc;
+	wc.cbClsExtra = 0;
+	wc.cbWndExtra = 0;
+	wc.hInstance = hInstance;
+	wc.hIcon = LoadIcon(NULL, IDC_ICON);
+	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+	//wc.hbrBackground = CreateSolidBrush(RGB(255, 0, 0));
+	wc.hbrBackground = reinterpret_cast<HBRUSH>(GetStockObject(WHITE_BRUSH));
+	wc.lpszMenuName = NULL;
+	wc.lpszClassName = TEXT("MyApp");
+
+	RegisterClass(&wc);
+
+	hWnd = CreateWindow(TEXT("MyApp"), TEXT("Sample Application"),
+		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+		CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, hInstance, NULL);
+	ShowWindow(hWnd, SW_SHOW);
+
+	while(GetMessage(&msg, NULL, NULL, NULL)) {
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+	
+	return 0;
+}
+
+
